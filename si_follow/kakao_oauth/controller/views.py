@@ -28,8 +28,8 @@ class OauthView(viewsets.ViewSet):
     def kakaoAccessTokenURI(self, request):
         print("kakaoAccessTokenURI()")
 
-        # GET 요청으로 쿼리 파라미터에서 'code' 값 가져오기
-        code = request.GET.get('code')
+        # POST 요청으로 요청 본문에서 'code' 값 가져오기
+        code = request.data.get('code')
 
         if not code:
             return JsonResponse({'error': 'Code is missing'}, status=400)
@@ -43,6 +43,7 @@ class OauthView(viewsets.ViewSet):
             return JsonResponse({'error': str(e)}, status=500)
 
     def kakaoUserInfoURI(self, request):
+        print("kakaoUserInfoURI()")
         accessToken = request.data.get('access_token')
         print(f'accessToken: {accessToken}')
 
