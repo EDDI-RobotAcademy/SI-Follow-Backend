@@ -25,5 +25,8 @@ class AccountRepositoryImpl(AccountRepository):
         roleTypeEntity, _ = AccountRoleType.objects.get_or_create(roleType=roleType)
 
         account = Account.objects.create(loginType=loginTypeEntity, roleType=roleTypeEntity)
+
         return account
+
+
 

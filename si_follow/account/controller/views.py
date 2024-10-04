@@ -23,11 +23,8 @@ class AccountView(viewsets.ViewSet):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def registerAccount(self, request):
+    def registerAccount(self, email):
         try:
-            nickname = request.data.get('nickname')
-            email = request.data.get('email')
-
             account = self.accountService.registerAccount(
                 loginType='KAKAO',
                 roleType='NORMAL',

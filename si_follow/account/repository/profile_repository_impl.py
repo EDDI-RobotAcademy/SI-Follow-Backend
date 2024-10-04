@@ -22,4 +22,13 @@ class ProfileRepositoryImpl(ProfileRepository):
         profile = Profile.objects.create(email=email, account=account)
         return profile
 
+    def findByEmail(self, email):
+        try:
+            return Profile.objects.get(email=email)
+        except Profile.DoesNotExist:
+            return None
+        except Exception as e:
+            print("이메일로 프로필 찾는 중 에러 발생:", e)
+            raise e
+
 

@@ -8,5 +8,5 @@ class AccountService(ABC):
         pass
 
     @abstractmethod
-    def registerAccount(self, loginType, roleType, nickname, email):
+    def registerAccount(self, loginType, roleType, email):
         pass
