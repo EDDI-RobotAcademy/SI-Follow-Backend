@@ -1,21 +1,19 @@
-import uuid
-
 from django.http import JsonResponse
-from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.response import Response
 
+from account.repository.profile_repository_impl import ProfileRepositoryImpl
 from account.service.account_service_impl import AccountServiceImpl
-from kakao_oauth.serializer.kakao_oauth_access_token_serializer import KakaoOauthAccessTokenSerializer
 from kakao_oauth.serializer.kakao_oauth_url_serializer import KakaoOauthUrlSerializer
 from kakao_oauth.service.kakao_oauth_service_impl import KakaoOauthServiceImpl
-from kakao_oauth.service.redis_service_impl import RedisServiceImpl
+from redis_service.redis_service_impl import RedisServiceImpl
 
 
 class OauthView(viewsets.ViewSet):
     kakaoOauthService = KakaoOauthServiceImpl.getInstance()
     redisService = RedisServiceImpl.getInstance()
     accountService = AccountServiceImpl.getInstance()
+    profileRepository = ProfileRepositoryImpl.getInstance()
 
     def kakaoOauthURI(self, request):
             url = self.kakaoOauthService.kakaoLoginAddress()
@@ -48,37 +46,51 @@ class OauthView(viewsets.ViewSet):
         print(f'accessToken: {accessToken}')
 
         try:
+            # 1. 카카오 사용자 정보 가져오기
             user_info = self.kakaoOauthService.requestUserInfo(accessToken)
-            return JsonResponse({'user_info': user_info})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            email = user_info.get('kakao_account', {}).get('email')
 
-    def redisAccessToken(self, request):
-        try:
-            email = request.data.get('email')
-            print(f"redisAccessToken -> email: {email}")
-            account = self.accountService.findAccountByEmail(email)
+            if not email:
+                return JsonResponse({'error': 'Email not found in user info'}, status=400)
+
+            # 2. 사용자 정보 DB에서 조회 (최초 로그인 여부 확인)
+            account = self.profileRepository.findByEmail(email)
+
             if not account:
-                return Response({'error': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
+                # 최초 로그인 - 새로운 사용자 등록
+                print("New user detected. Saving user info to DB.")
+                self.accountService.registerAccount(
+                    loginType='KAKAO',  # 이 부분은 GitHub일 경우 'GITHUB'로 바꿀 수 있음
+                    roleType='NORMAL',
+                    email=email,
+                )
 
-            userToken = str(uuid.uuid4())
-            print(f"type of account.id: {type(account.id)}")
-            self.redisService.store_access_token(account.id, userToken)
-            # key로 value 찾기 테스트
-            accountId = self.redisService.getValueByKey(userToken)
-            print(f"accountId: {accountId}")
+            # 3. Redis에 액세스 토큰 저장 및 발급
+            redis_token_response = self.redisAccessToken(email)
+            if redis_token_response.status_code != 200:
+                return JsonResponse({'error': 'Failed to store token in Redis'},
+                                    status=redis_token_response.status_code)
 
-            return Response({ 'userToken': userToken }, status=status.HTTP_200_OK)
+            # 4. Redis에서 발급된 토큰 가져오기
+            user_token = redis_token_response.data.get('userToken')
+
+            # 5. 사용자 정보와 Redis 토큰 반환
+            return JsonResponse({
+                'user_info': user_info,
+                'token': user_token  # Redis에서 발급된 토큰 포함
+            })
+
+        except KeyError as e:
+            print(f"KeyError: {str(e)}")
+            return JsonResponse({'error': 'Invalid data received'}, status=400)
         except Exception as e:
-            print('Error storing access token in Redis:', e)
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            print(f"Unexpected error: {str(e)}")
+            return JsonResponse({'error': 'Server error'}, status=500)
 
+    def redisAccessToken(self, email):
+        return self.redisService.generate_and_store_access_token(self.profileRepository, email)
+
+    # Redis에서 토큰 삭제 (로그아웃 처리)
     def dropRedisTokenForLogout(self, request):
-        try:
-            userToken = request.data.get('userToken')
-            isSuccess = self.redisService.deleteKey(userToken)
-
-            return Response({'isSuccess': isSuccess}, status=status.HTTP_200_OK)
-        except Exception as e:
-            print('레디스 토큰 해제 중 에러 발생:', e)
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        userToken = request.data.get('userToken')
+        return self.redisService.delete_access_token(userToken)
