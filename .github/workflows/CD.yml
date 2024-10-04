@@ -73,7 +73,7 @@ jobs:
   deploy:
     needs: build
     name: Deploy
-    runs-on: [self-hosted, deploy-django]
+    runs-on: [self-hosted, deploy-si-backend]
     steps:
     - name: Get Github Actions IP
       id: ip
