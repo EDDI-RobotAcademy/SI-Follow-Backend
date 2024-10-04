@@ -39,7 +39,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Install Dependencies
-      working-directory: ./lms_project
+      working-directory: ./si_follow
       run: |
         if [ -f requirements.txt ]; then
           python -m venv .venv
