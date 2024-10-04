@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-21*-pbgtpnfb64wz@+7d!)5ewv)z-o$t_7)4r&^c0o#v=+^!2a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'account',
     'kakao_oauth',
+    'redis_service',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,9 @@ NAVER = {
 
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+print('CORS_ALLOWED_ORIGINS:', CORS_ALLOWED_ORIGINS)
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -141,7 +145,7 @@ REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/0',
+        'LOCATION': f'redis_service://{REDIS_HOST}:{REDIS_PORT}/0',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
             'PASSWORD': REDIS_PASSWORD,
