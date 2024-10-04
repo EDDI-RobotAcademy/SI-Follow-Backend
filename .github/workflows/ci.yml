@@ -41,6 +41,8 @@ jobs:
     - name: Install Dependencies
       working-directory: ./si_follow
       run: |
+        pwd  # 현재 경로 확인
+        ls -la  # 현재 경로에 있는 파일 목록 출력
         if [ -f requirements.txt ]; then
           python -m venv .venv
           source .venv/bin/activate
