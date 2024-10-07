@@ -62,15 +62,28 @@ jobs:
         echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
         echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env  
         echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env  
+
+        # KAKAO
         echo "KAKAO_LOGIN_URL=${{ secrets.KAKAO_LOGIN_URL }}" >> .env
         echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
         echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
         echo "KAKAO_TOKEN_REQUEST_URI=${{ secrets.KAKAO_TOKEN_REQUEST_URI }}" >> .env
         echo "KAKAO_USERINFO_REQUEST_URI=${{ secrets.KAKAO_USERINFO_REQUEST_URI }}" >> .env
+
+        # GITHUB
+        echo "GITHUB_LOGIN_URL=${{ secrets.GITHUB_LOGIN_URL }}" >> .env
+        echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env
+        echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env
+        echo "GITHUB_REDIRECT_URI=${{ secrets.GITHUB_REDIRECT_URI }}" >> .env
+        echo "GITHUB_TOKEN_REQUEST_URI=${{ secrets.GITHUB_TOKEN_REQUEST_URI }}" >> .env
+        echo "GITHUB_USERINFO_REQUEST_URI=${{ secrets.GITHUB_USERINFO_REQUEST_URI }}" >> .env
+        echo "GITHUB_USERINFO_EMAIL_REQUEST_URI=${{ secrets.GITHUB_USERINFO_EMAIL_REQUEST_URI }}" >> .env
+    
         echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
         echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
         echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
+        
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
       run: |
