@@ -23,7 +23,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-21*-pbgtpnfb64wz@+7d!)5ewv)z-o$t_7)4r&^c0o#v=+^!2a"
+# SECRET_KEY를 환경 변수에서 가져옵니다
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("The SECRET_KEY setting must not be empty.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -46,6 +50,7 @@ INSTALLED_APPS = [
     'account',
     'kakao_oauth',
     'redis_service',
+    'board',
 ]
 
 MIDDLEWARE = [
@@ -75,8 +80,10 @@ NAVER = {
     'USERINFO_REQUEST_URI': os.getenv('NAVER_USERINFO_REQUEST_URI')
 }
 
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = [origin for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if origin]
+CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin]
+print('CORS_ALLOWED_ORIGINS from .env:', os.getenv('CORS_ALLOWED_ORIGINS'))
+print('CSRF_TRUSTED_ORIGINS from .env:', os.getenv('CSRF_TRUSTED_ORIGINS'))
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 print('CORS_ALLOWED_ORIGINS:', CORS_ALLOWED_ORIGINS)
