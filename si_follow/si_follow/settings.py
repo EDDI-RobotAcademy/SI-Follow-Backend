@@ -9,8 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-21*-pbgtpnfb64wz@+7d!)5ewv)z-o$t_7)4r&^c0o#v=+^!2a"
+# SECRET_KEY를 환경 변수에서 가져옵니다
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError("The SECRET_KEY setting must not be empty.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -40,6 +47,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'django_extensions',
+    'account',
+    'kakao_oauth',
+    'redis_service',
+    'board',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +61,54 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+KAKAO = {
+    'LOGIN_URL': os.getenv('KAKAO_LOGIN_URL'),
+    'CLIENT_ID': os.getenv('KAKAO_CLIENT_ID'),
+    'REDIRECT_URI': os.getenv('KAKAO_REDIRECT_URI'),
+    'TOKEN_REQUEST_URI': os.getenv('KAKAO_TOKEN_REQUEST_URI'),
+    'USERINFO_REQUEST_URI': os.getenv('KAKAO_USERINFO_REQUEST_URI'),
+}
+
+NAVER = {
+    'LOGIN_URL': os.getenv('NAVER_LOGIN_URL'),
+    'CLIENT_ID': os.getenv('NAVER_CLIENT_ID'),
+    'REDIRECT_URI': os.getenv('NAVER_REDIRECT_URL'),
+    'TOKEN_REQUEST_URI': os.getenv('NAVER_TOKEN_REQUEST_URI'),
+    'USERINFO_REQUEST_URI': os.getenv('NAVER_USERINFO_REQUEST_URI')
+}
+
+CORS_ALLOWED_ORIGINS = [origin for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if origin]
+CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin]
+print('CORS_ALLOWED_ORIGINS from .env:', os.getenv('CORS_ALLOWED_ORIGINS'))
+print('CSRF_TRUSTED_ORIGINS from .env:', os.getenv('CSRF_TRUSTED_ORIGINS'))
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+print('CORS_ALLOWED_ORIGINS:', CORS_ALLOWED_ORIGINS)
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 ROOT_URLCONF = "si_follow.urls"
@@ -72,17 +131,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "si_follow.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': '3306',
     }
 }
 
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = os.getenv('REDIS_PORT')
+REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f'redis_service://{REDIS_HOST}:{REDIS_PORT}/0',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': REDIS_PASSWORD,
+            'SOCKET_CONNECT_TIMEOUT': 5,
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -102,7 +179,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -113,7 +189,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
