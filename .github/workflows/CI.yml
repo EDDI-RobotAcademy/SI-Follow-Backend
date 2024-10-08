@@ -86,7 +86,7 @@ jobs:
         
         # Django Secret Key
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
-
+        cat .env
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
       run: |
