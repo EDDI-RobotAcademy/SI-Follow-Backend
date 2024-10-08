@@ -42,8 +42,8 @@ jobs:
     - name: Install Dependencies
       working-directory: ./si_follow
       run: |
-        pwd  # 현재 경로 확인
-        ls -la  # 현재 경로에 있는 파일 목록 출력
+        pwd  
+        ls -la  
         if [ -f requirements.txt ]; then
           python -m venv .venv
           source .venv/bin/activate
@@ -88,9 +88,6 @@ jobs:
         
         # Django Secret Key
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
-
-        # .env 파일 확인을 위해 로그 출력
-        echo "SECRET_KEY from .env: $(grep 'SECRET_KEY' .env)"
 
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
