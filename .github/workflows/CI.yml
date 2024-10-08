@@ -38,6 +38,7 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+
     - name: Install Dependencies
       working-directory: ./si_follow
       run: |
@@ -52,6 +53,7 @@ jobs:
           echo "requirements.txt not found"
           exit 1
         fi
+
     - name: Create .env file for CI
       working-directory: ./si_follow
       run: |
@@ -87,6 +89,7 @@ jobs:
         # Django Secret Key
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
         cat .env
+
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
       run: |
@@ -102,16 +105,19 @@ jobs:
           exit 1
         fi
         echo 'MySQL is up - continuning'
+
     - name: Make migrations
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py makemigrations
+
     - name: Run migrate
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py migrate --noinput
+
     - name: Find test modules
       working-directory: ./si_follow
       run: |
@@ -119,11 +125,13 @@ jobs:
         chmod +x find_test.sh
         TEST_MODULES=$(./find_test.sh)
         echo "TEST_MODULES=$TEST_MODULES" >> $GITHUB_ENV
+
     - name: Run Tests
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py test $TEST_MODULES
+
     - name: send BACKEND_TEST_FINISH_TRIGGER
       run: |
         curl -S -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
