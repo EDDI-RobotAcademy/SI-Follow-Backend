@@ -68,7 +68,7 @@ jobs:
     - name: Build and push Docker image
       run: |
         cd si_follow
-        docker buildx build --platform linux/arm64 -f Dockerfile -t ghcr.io/${{ github.actor }}/tf-django-server:latest --push .
+        docker buildx build --platform linux/arm64 -f Dockerfile -t ghcr.io/${{ github.actor }}/si-follow-django-server:latest --push .
 
   deploy:
     needs: build
