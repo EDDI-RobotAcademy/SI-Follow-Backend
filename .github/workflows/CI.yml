@@ -63,27 +63,30 @@ jobs:
         echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env  
         echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env  
 
-        # KAKAO
+        # KAKAO Authentication
         echo "KAKAO_LOGIN_URL=${{ secrets.KAKAO_LOGIN_URL }}" >> .env
         echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
         echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
         echo "KAKAO_TOKEN_REQUEST_URI=${{ secrets.KAKAO_TOKEN_REQUEST_URI }}" >> .env
         echo "KAKAO_USERINFO_REQUEST_URI=${{ secrets.KAKAO_USERINFO_REQUEST_URI }}" >> .env
 
-        # GITHUB
-        echo "GITHUB_LOGIN_URL=${{ secrets.GITHUB_LOGIN_URL }}" >> .env
-        echo "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" >> .env
-        echo "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" >> .env
-        echo "GITHUB_REDIRECT_URI=${{ secrets.GITHUB_REDIRECT_URI }}" >> .env
-        echo "GITHUB_TOKEN_REQUEST_URI=${{ secrets.GITHUB_TOKEN_REQUEST_URI }}" >> .env
-        echo "GITHUB_USERINFO_REQUEST_URI=${{ secrets.GITHUB_USERINFO_REQUEST_URI }}" >> .env
-        echo "GITHUB_USERINFO_EMAIL_REQUEST_URI=${{ secrets.GITHUB_USERINFO_EMAIL_REQUEST_URI }}" >> .env
-    
+        # GitHub Authentication
+        echo "LOGIN_URL_GITHUB=${{ secrets.LOGIN_URL_GITHUB }}" >> .env
+        echo "CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}" >> .env
+        echo "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" >> .env
+        echo "REDIRECT_URI_GITHUB=${{ secrets.REDIRECT_URI_GITHUB }}" >> .env
+        echo "TOKEN_REQUEST_URI_GITHUB=${{ secrets.TOKEN_REQUEST_URI_GITHUB }}" >> .env
+        echo "USERINFO_REQUEST_URI_GITHUB=${{ secrets.USERINFO_REQUEST_URI_GITHUB }}" >> .env
+        echo "USERINFO_EMAIL_REQUEST_URI_GITHUB=${{ secrets.USERINFO_EMAIL_REQUEST_URI_GITHUB }}" >> .env
+
+        # Redis Configuration
         echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
         echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
         echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
-        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
         
+        # Django Secret Key
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
+
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
       run: |
