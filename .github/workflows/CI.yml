@@ -38,11 +38,12 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+
     - name: Install Dependencies
       working-directory: ./si_follow
       run: |
-        pwd  # 현재 경로 확인
-        ls -la  # 현재 경로에 있는 파일 목록 출력
+        pwd  
+        ls -la  
         if [ -f requirements.txt ]; then
           python -m venv .venv
           source .venv/bin/activate
@@ -52,6 +53,7 @@ jobs:
           echo "requirements.txt not found"
           exit 1
         fi
+
     - name: Create .env file for CI
       working-directory: ./si_follow
       run: |
@@ -62,15 +64,31 @@ jobs:
         echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
         echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" >> .env  
         echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env  
+
+        # KAKAO Authentication
         echo "KAKAO_LOGIN_URL=${{ secrets.KAKAO_LOGIN_URL }}" >> .env
         echo "KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}" >> .env
         echo "KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" >> .env
         echo "KAKAO_TOKEN_REQUEST_URI=${{ secrets.KAKAO_TOKEN_REQUEST_URI }}" >> .env
         echo "KAKAO_USERINFO_REQUEST_URI=${{ secrets.KAKAO_USERINFO_REQUEST_URI }}" >> .env
+
+        # GitHub Authentication
+        echo "LOGIN_URL_GITHUB=${{ secrets.LOGIN_URL_GITHUB }}" >> .env
+        echo "CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}" >> .env
+        echo "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" >> .env
+        echo "REDIRECT_URI_GITHUB=${{ secrets.REDIRECT_URI_GITHUB }}" >> .env
+        echo "TOKEN_REQUEST_URI_GITHUB=${{ secrets.TOKEN_REQUEST_URI_GITHUB }}" >> .env
+        echo "USERINFO_REQUEST_URI_GITHUB=${{ secrets.USERINFO_REQUEST_URI_GITHUB }}" >> .env
+        echo "USERINFO_EMAIL_REQUEST_URI_GITHUB=${{ secrets.USERINFO_EMAIL_REQUEST_URI_GITHUB }}" >> .env
+
+        # Redis Configuration
         echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
         echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
         echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+        
+        # Django Secret Key
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
+
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
       run: |
@@ -86,16 +104,19 @@ jobs:
           exit 1
         fi
         echo 'MySQL is up - continuning'
+
     - name: Make migrations
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py makemigrations
+
     - name: Run migrate
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py migrate --noinput
+
     - name: Find test modules
       working-directory: ./si_follow
       run: |
@@ -103,11 +124,13 @@ jobs:
         chmod +x find_test.sh
         TEST_MODULES=$(./find_test.sh)
         echo "TEST_MODULES=$TEST_MODULES" >> $GITHUB_ENV
+
     - name: Run Tests
       working-directory: ./si_follow
       run: |
         source .venv/bin/activate
         python manage.py test $TEST_MODULES
+
     - name: send BACKEND_TEST_FINISH_TRIGGER
       run: |
         curl -S -X POST https://api.github.com/repos/${{ github.repository }}/dispatches \
