@@ -88,7 +88,9 @@ jobs:
         
         # Django Secret Key
         echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env  
-        cat .env
+
+        # .env 파일 확인을 위해 로그 출력
+        echo "SECRET_KEY from .env: $(grep 'SECRET_KEY' .env)"
 
     - name: Wait for MySQL to be ready
       working-directory: ./si_follow
