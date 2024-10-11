@@ -7,7 +7,7 @@ class Profile(models.Model):
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Profile -> email: {self.email}, nickname: {self.nickname}"
+        return f"Profile -> email: {self.email}"
 
     class Meta:
         db_table = 'profile'
