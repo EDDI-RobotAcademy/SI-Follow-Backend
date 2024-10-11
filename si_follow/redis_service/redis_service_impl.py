@@ -3,7 +3,6 @@ import redis
 from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
-
 from redis_service.redis_service import RedisService
 
 
@@ -37,9 +36,9 @@ class RedisServiceImpl(RedisService):
             print(f"Error storing access token in Redis: {e}")
             raise e
 
-    def get_value_by_key(self, key):
+    def get_value_by_key(self, userToken):
         try:
-            return self.redis_client.get(key)
+            return self.redis_client.get(userToken)
         except Exception as e:
             print(f"Error retrieving token from Redis: {e}")
             raise e
