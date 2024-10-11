@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'kakao_oauth',
     'redis_service',
     'board',
+    'si_follow',
 ]
 
 MIDDLEWARE = [
