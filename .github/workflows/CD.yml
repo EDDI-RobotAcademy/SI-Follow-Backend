@@ -75,10 +75,11 @@ jobs:
     name: Deploy
     runs-on: [self-hosted, deploy-si-backend]
     steps:
+    
     - name: Get Github Actions IP
       id: ip
-      uses: haythem/public-ip@v1.2
-      
+      uses: haythem/public-ip@latest
+
     - name: Configure AWS IAM Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
