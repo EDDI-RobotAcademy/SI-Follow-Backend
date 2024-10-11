@@ -14,4 +14,5 @@ urlpatterns = [
     path('register',
          AccountView.as_view({'post': 'registerAccount'}),
          name='register-account'),
+    path('get-user-email', AccountView.as_view({'post': 'getUserEmailFromToken'}), name='get-user-email'),
 ]
