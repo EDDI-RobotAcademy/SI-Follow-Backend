@@ -42,17 +42,17 @@ class GithubOauthServiceImpl(GithubOauthService):
             'redirect_uri': self.redirectUri
         }
 
-        print(f"client_id: {self.clientId}")
-        print(f"client_secret: {self.clientSecret}")
-        print(f"code: {githubAuthCode}")
-        print(f"tokenRequestUri: {self.tokenRequestUri}")
+        # print(f"client_id: {self.clientId}")
+        # print(f"client_secret: {self.clientSecret}")
+        # print(f"code: {githubAuthCode}")
+        # print(f"tokenRequestUri: {self.tokenRequestUri}")
 
         headers = {'Accept': 'application/json'}
         response = requests.post(self.tokenRequestUri, headers=headers, data=accessTokenRequestForm)
 
         # 상태 코드와 응답 내용 출력
         print(f"response status code: {response.status_code}")
-        print(f"response content: {response.content}")
+        # print(f"response content: {response.content}")
 
         return response.json().get('access_token')
 
@@ -71,8 +71,6 @@ class GithubOauthServiceImpl(GithubOauthService):
             user_info = {}
             print("Expected dictionary but got a list, skipping user_info extraction.")
 
-        print(f"user_info: {user_info}")
-
         # 2. 사용자 기본 정보에 이메일이 없는 경우, 이메일 정보 요청
         email = user_info.get('email') if isinstance(user_info, dict) else None
         if not email:
@@ -81,7 +79,7 @@ class GithubOauthServiceImpl(GithubOauthService):
             emails = email_response.json()
 
             # emails는 리스트로 반환되므로, 리스트에서 primary 이메일을 찾아야 함
-            print(f"emails: {emails}")
+            # print(f"emails: {emails}")
             email = next(
                 (email_data['email'] for email_data in emails if email_data['primary'] and email_data['verified']),
                 None)
