@@ -44,63 +44,66 @@ class GithubOauthView(viewsets.ViewSet):
             accessToken = self.githubOauthService.requestAccessToken(code)
             print(f"Access token: {accessToken}")
 
-            # 2. Access Token을 사용하여 사용자 정보 가져오기
-            user_info = self.githubUserInfo(accessToken)
-            return JsonResponse(user_info, status=200)
+            # 2. Access Token으로 사용자 정보 요청
+            user_info = self.githubOauthService.requestUserInfo(accessToken)
+            email = user_info.get('email')
+
+            if not email:
+                return JsonResponse({'error': 'Email not found in user info'}, status=400)
+
+            # 3. Redis에 Access Token과 이메일 저장
+            redis_token_response = self.redisAccessToken(email, accessToken)
+            if redis_token_response.status_code != 200:
+                return JsonResponse({'error': 'Failed to store token in Redis'},
+                                    status=redis_token_response.status_code)
+
+            # 4. Redis에서 발급된 userToken 가져오기
+            user_token = redis_token_response.data.get('userToken')
+
+            # 5. userToken만 프론트엔드에 반환
+            return JsonResponse({'userToken': user_token}, status=200)
 
         except Exception as e:
             print(f"Error during GitHub OAuth flow: {str(e)}")
             return JsonResponse({'error': str(e)}, status=500)
 
-    # Access Token으로 사용자 정보 가져오기 및 Redis에 토큰 저장
-    def githubUserInfo(self, accessToken):
-        print("githubUserInfo()")
+    # 프론트엔드에서 userToken으로 사용자 정보와 accessToken 요청 시 처리
+    def getUserInfo(self, request):
+        print("getUserInfo()")
+
+        # POST 요청에서 'userToken' 값 가져오기
+        user_token = request.data.get('user_token')
+
+        if not user_token:
+            return JsonResponse({'error': 'User token is missing'}, status=400)
 
         try:
-            # 1. Access Token을 사용하여 GitHub 사용자 정보 가져오기
-            user_info = self.githubOauthService.requestUserInfo(accessToken)
-            email = user_info.get('email')
+            # 1. Redis에서 userToken으로 accessToken 조회
+            stored_data = self.redisService.get_value_by_key(user_token)
 
-            if not email:
-                return {'error': 'Email not found in user info'}, status.HTTP_400_BAD_REQUEST
+            if not stored_data or 'access_token' not in stored_data:
+                return JsonResponse({'error': 'Access token not found in Redis'}, status=404)
 
-            # 2. 사용자 정보 DB에서 조회
-            account = self.profileRepository.findByEmail(email)
+            access_token = stored_data['access_token']
 
-            if not account:
-                # 최초 로그인 - 새로운 사용자 등록
-                print("New user detected. Saving user info to DB.")
-                self.accountService.registerAccount(
-                    loginType='GITHUB',
-                    roleType='NORMAL',
-                    email=email,
-                )
+            # 2. accessToken으로 GitHub 사용자 정보 요청
+            user_info = self.githubOauthService.requestUserInfo(access_token)
 
-            # 3. Redis에 Access Token 저장 및 발급
-            redis_token_response = self.redisAccessToken(email)
-            if redis_token_response.status_code != 200:
-                return {'error': 'Failed to store token in Redis'}, redis_token_response.status_code
-
-            # 4. Redis에서 발급된 토큰 가져오기
-            user_token = redis_token_response.data.get('userToken')
-
-            # 5. 사용자 정보와 Redis 토큰 반환
-            return {
+            # 3. 사용자 정보와 함께 accessToken도 반환
+            return JsonResponse({
                 'user_info': user_info,
-                'token': user_token  # Redis에서 발급된 토큰 포함
-            }
+                'access_token': access_token
+            }, status=200)
 
-        except KeyError as e:
-            print(f"KeyError: {str(e)}")
-            return {'error': 'Invalid data received'}, status.HTTP_400_BAD_REQUEST
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
-            return {'error': 'Server error'}, status.HTTP_500_INTERNAL_SERVER_ERROR
+            print(f"Error retrieving user info: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
 
     # Redis에 Access Token 저장 (별도의 메서드로 분리)
-    def redisAccessToken(self, email):
+    def redisAccessToken(self, email, accessToken):
         try:
-            return self.redisService.generate_and_store_access_token(self.profileRepository, email)
+            # Redis에 Access Token과 함께 userToken 저장
+            return self.redisService.generate_and_store_access_token(self.profileRepository, email, accessToken)
         except Exception as e:
             print(f"Error generating/storing access token in Redis: {e}")
             return JsonResponse({'error': 'Failed to store access token'}, status=500)
