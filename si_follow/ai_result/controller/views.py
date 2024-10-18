@@ -20,3 +20,15 @@ class AIResultView(viewsets.ViewSet):
         result = self.ai_result_service.get_backlogs(user_token, project_name)
         return Response(result, status=status.HTTP_200_OK)
 
+    # 파일 리스트 저장 및 가져오기
+    def store_file_list(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.fetch_and_store_file_list(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get_file_list(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.get_file_list(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)

@@ -13,4 +13,6 @@ urlpatterns = [
 
     path('backlogs', AIResultView.as_view({'post': 'store_backlogs'}), name='airesult-store-backlogs'),
     path('backlogs/get', AIResultView.as_view({'post': 'get_backlogs'}), name='airesult-get-backlogs'),
+    path('file-list', AIResultView.as_view({'post': 'store_file_list'}), name='airesult-store-file-list'),
+    path('file-list/get', AIResultView.as_view({'post': 'get_file_list'}), name='airesult-get-file-list'),
 ]
