@@ -32,3 +32,16 @@ class AIResultView(viewsets.ViewSet):
         project_name = request.data.get('project_name')
         result = self.ai_result_service.get_file_list(user_token, project_name)
         return Response(result, status=status.HTTP_200_OK)
+
+    # 테스트 리포트 저장 및 가져오기
+    def store_test_reports(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.fetch_and_store_test_reports(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get_test_reports(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.get_test_reports(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)
