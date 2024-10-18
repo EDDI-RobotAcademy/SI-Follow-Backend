@@ -9,4 +9,12 @@ class AIResultRepository(ABC):
     def get_backlogs(self, account_id, project_name):
         pass
 
+    @abstractmethod
+    def save_files(self, account_id, project_name, file_list):
+        pass
+
+    @abstractmethod
+    def get_files(self, account_id, project_name):
+        pass
+
 

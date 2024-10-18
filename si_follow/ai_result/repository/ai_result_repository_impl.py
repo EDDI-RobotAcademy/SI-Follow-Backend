@@ -19,4 +19,16 @@ class AIResultRepositoryImpl(AIResultRepository):
         backlogs = Backlog.objects.filter(project=project)
         return {'project_name': project_name, 'backlogs': [backlog.description for backlog in backlogs]}
 
+    # 파일 리스트 저장
+    def save_files(self, account_id, project_name, file_list):
+        project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)
+        FileList.objects.filter(project=project).delete()  # 기존 파일 삭제
+        FileList.objects.create(project=project, file_name=file_list)
+
+    # 파일 리스트 조회
+    def get_files(self, account_id, project_name):
+        project = Project.objects.get(account_id=account_id, project_name=project_name)
+        files = FileList.objects.filter(project=project)
+        return {'project_name': project_name, 'files': [file.file_name for file in files]}
+
 
