@@ -31,4 +31,15 @@ class AIResultRepositoryImpl(AIResultRepository):
         files = FileList.objects.filter(project=project)
         return {'project_name': project_name, 'files': [file.file_name for file in files]}
 
+    # 테스트 리포트 저장
+    def save_test_reports(self, account_id, project_name, test_reports):
+        project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)
+        TestReport.objects.filter(project=project).delete()  # 기존 리포트 삭제
+        TestReport.objects.create(project=project, report_content=test_reports)
+
+    # 테스트 리포트 조회
+    def get_test_reports(self, account_id, project_name):
+        project = Project.objects.get(account_id=account_id, project_name=project_name)
+        test_report = TestReport.objects.get(project=project)
+        return {'project_name': project_name, 'test_report': test_report.report_content}
 
