@@ -33,3 +33,11 @@ class AIResultRepository(ABC):
     def get_test_reports(self, account_id, project_name):
         pass
 
+    @abstractmethod
+    def save_code_review(self, account_id, project_name, code_review):
+        pass
+
+    @abstractmethod
+    def get_code_review(self, account_id, project_name):
+        pass
+

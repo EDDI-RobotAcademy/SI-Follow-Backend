@@ -62,3 +62,16 @@ class AIResultView(viewsets.ViewSet):
         project_name = request.data.get('project_name')
         result = self.ai_result_service.get_test_reports(user_token, project_name)
         return Response(result, status=status.HTTP_200_OK)
+
+    def store_code_review(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        code_review = request.data.get('code_review')
+        result = self.ai_result_service.store_code_review(user_token, project_name, code_review)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get_code_review(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.get_code_review(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)

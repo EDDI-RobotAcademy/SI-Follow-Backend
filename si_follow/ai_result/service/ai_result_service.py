@@ -34,3 +34,11 @@ class AIResultService(ABC):
     @abstractmethod
     def get_test_reports(self, user_token, project_name):
         pass
+
+    @abstractmethod
+    def store_code_review(self, user_token, project_name, code_review):
+        pass
+
+    @abstractmethod
+    def get_code_review(self, user_token, project_name):
+        pass

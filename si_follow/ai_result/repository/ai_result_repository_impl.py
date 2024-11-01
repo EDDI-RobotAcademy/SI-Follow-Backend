@@ -60,3 +60,14 @@ class AIResultRepositoryImpl(AIResultRepository):
         test_reports = TestReport.objects.filter(project=project)
         return {'project_name': project_name, 'test_reports': [test_report.report_content for test_report in test_reports]}
 
+    def save_code_review(self, account_id, project_name, code_review):
+        project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)
+        CodeReview.objects.filter(project_id=project.id).delete()  # 기존 리포트 삭제
+        CodeReview.objects.create(project=project, code_review=code_review)
+
+    # 테스트 리포트 조회
+    def get_code_review(self, account_id, project_name):
+        project = Project.objects.get(account_id=account_id, project_name=project_name)
+        code_review = CodeReview.objects.filter(project=project)
+        return {'project_name': project_name, 'code_review': [code_review.code_review for code_review in code_review]}
+

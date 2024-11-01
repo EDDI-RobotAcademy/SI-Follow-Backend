@@ -19,4 +19,6 @@ urlpatterns = [
     path('file-content/get', AIResultView.as_view({'post': 'get_file_content'}), name='airesult-get-file-content'),
     path('test-reports', AIResultView.as_view({'post': 'store_test_reports'}), name='airesult-store-test-reports'),
     path('test-reports/get', AIResultView.as_view({'post': 'get_test_reports'}), name='airesult-get-test-reports'),
+    path('code-review', AIResultView.as_view({'post': 'store_code_review'}), name='airesult-store-code-review'),
+    path('code-review/get', AIResultView.as_view({'post': 'get_code_review'}), name='airesult-get-test-reports'),
 ]
