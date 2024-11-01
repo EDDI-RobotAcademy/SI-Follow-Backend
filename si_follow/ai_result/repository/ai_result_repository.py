@@ -10,11 +10,19 @@ class AIResultRepository(ABC):
         pass
 
     @abstractmethod
-    def save_files(self, account_id, project_name, file_list):
+    def save_file_list(self, account_id, project_name, file_list):
         pass
 
     @abstractmethod
-    def get_files(self, account_id, project_name):
+    def get_file_list(self, account_id, project_name):
+        pass
+
+    @abstractmethod
+    def save_file_content(self, account_id, project_name, file_name, file_content):
+        pass
+
+    @abstractmethod
+    def get_file_content(self, account_id, project_name):
         pass
 
     @abstractmethod

@@ -53,6 +53,19 @@ class RedisServiceImpl(RedisService):
             print(f"Error retrieving token from Redis: {e}")
             raise e
 
+    def get_value_by_access_token(self, accessToken):
+        try:
+            for key in self.redis_client.scan_iter():
+                if self.redis_client.type(key) != 'hash':
+                    continue  # 해시가 아닌 키는 무시
+                data = self.redis_client.hgetall(key)
+                if data.get('access_token') == accessToken:
+                    return {'userToken': key, 'account_id': data.get('account_id'), 'access_token': accessToken}
+            return None
+        except Exception as e:
+            print(f"Error retrieving account by access token from Redis: {e}")
+            raise e
+
     def delete_key(self, key):
         try:
             result = self.redis_client.delete(key)

@@ -14,21 +14,14 @@ class AIResultServiceImpl(AIResultService):
 
 
     # 백로그 저장
-    def fetch_and_store_backlogs(self, user_token, project_name):
-        stored_data = self.redis_service.get_value_by_key(user_token)
+    def store_backlogs(self, user_token, project_name, backlog_data):
+        stored_data = self.redis_service.get_value_by_access_token(user_token)
         if 'account_id' not in stored_data:
             return {'error': '유효하지 않은 user_token'}
 
         account_id = stored_data['account_id']
-        response = requests.post(f'{self.fast_api_url}/get-backlogs', json={
-            'user_token': user_token,
-            'project_name': project_name
-        })
-        if response.status_code == 200:
-            backlog_data = response.json().get('backlog')
-            self.ai_result_repository.save_backlogs(account_id, project_name, backlog_data)
-            return {'message': '백로그 저장 완료'}
-        return {'error': '백로그 가져오기 실패'}
+        self.ai_result_repository.save_backlogs(account_id, project_name, backlog_data)
+        return {'message': '백로그 저장 완료'}
 
     # 백로그 조회
     def get_backlogs(self, user_token, project_name):
@@ -40,21 +33,14 @@ class AIResultServiceImpl(AIResultService):
         return self.ai_result_repository.get_backlogs(account_id, project_name)
 
     # 파일 리스트 저장
-    def fetch_and_store_file_list(self, user_token, project_name):
-        stored_data = self.redis_service.get_value_by_key(user_token)
+    def store_file_list(self, user_token, project_name, file_list):
+        stored_data = self.redis_service.get_value_by_access_token(user_token)
         if 'account_id' not in stored_data:
             return {'error': '유효하지 않은 user_token'}
 
         account_id = stored_data['account_id']
-        response = requests.post(f'{self.fast_api_url}/get-file-list', json={
-            'user_token': user_token,
-            'project_name': project_name
-        })
-        if response.status_code == 200:
-            file_list = response.json().get('file_list')
-            self.ai_result_repository.save_files(account_id, project_name, file_list)
-            return {'message': '파일 리스트 저장 완료'}
-        return {'error': '파일 리스트 가져오기 실패'}
+        self.ai_result_repository.save_file_list(account_id, project_name, file_list)
+        return {'message': '파일 리스트 저장 완료'}
 
     # 파일 리스트 조회
 
@@ -64,24 +50,36 @@ class AIResultServiceImpl(AIResultService):
             return {'error': '유효하지 않은 user_token'}
 
         account_id = stored_data['account_id']
-        return self.ai_result_repository.get_files(account_id, project_name)
+        return self.ai_result_repository.get_file_list(account_id, project_name)
 
-    # 테스트 리포트 저장
-    def fetch_and_store_test_reports(self, user_token, project_name):
+    def store_file_content(self, user_token, project_name, file_name, file_content):
+        stored_data = self.redis_service.get_value_by_access_token(user_token)
+        if 'account_id' not in stored_data:
+            return {'error': '유효하지 않은 user_token'}
+
+        account_id = stored_data['account_id']
+        self.ai_result_repository.save_file_content(account_id, project_name, file_name, file_content)
+        return {'message': '파일 리스트 저장 완료'}
+
+    # 파일 리스트 조회
+
+    def get_file_content(self, user_token, project_name):
         stored_data = self.redis_service.get_value_by_key(user_token)
         if 'account_id' not in stored_data:
             return {'error': '유효하지 않은 user_token'}
 
         account_id = stored_data['account_id']
-        response = requests.post(f'{self.fast_api_url}/get-test-reports', json={
-            'user_token': user_token,
-            'project_name': project_name
-        })
-        if response.status_code == 200:
-            test_reports = response.json().get('test_reports')
-            self.ai_result_repository.save_test_reports(account_id, project_name, test_reports)
-            return {'message': '테스트 리포트 저장 완료'}
-        return {'error': '테스트 리포트 가져오기 실패'}
+        return self.ai_result_repository.get_file_content(account_id, project_name)
+
+    # 테스트 리포트 저장
+    def store_test_reports(self, user_token, project_name, test_reports):
+        stored_data = self.redis_service.get_value_by_access_token(user_token)
+        if 'account_id' not in stored_data:
+            return {'error': '유효하지 않은 user_token'}
+
+        account_id = stored_data['account_id']
+        self.ai_result_repository.save_test_reports(account_id, project_name, test_reports)
+        return {'message': '테스트 리포트 저장 완료'}
 
     # 테스트 리포트 조회
     def get_test_reports(self, user_token, project_name):

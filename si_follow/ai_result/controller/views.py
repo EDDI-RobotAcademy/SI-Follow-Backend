@@ -11,7 +11,8 @@ class AIResultView(viewsets.ViewSet):
     def store_backlogs(self, request):
         user_token = request.data.get('user_token')
         project_name = request.data.get('project_name')
-        result = self.ai_result_service.fetch_and_store_backlogs(user_token, project_name)
+        backlog_data = request.data.get('backlog')
+        result = self.ai_result_service.store_backlogs(user_token, project_name, backlog_data)
         return Response(result, status=status.HTTP_200_OK)
 
     def get_backlogs(self, request):
@@ -24,7 +25,8 @@ class AIResultView(viewsets.ViewSet):
     def store_file_list(self, request):
         user_token = request.data.get('user_token')
         project_name = request.data.get('project_name')
-        result = self.ai_result_service.fetch_and_store_file_list(user_token, project_name)
+        file_list = request.data.get('file_list')
+        result = self.ai_result_service.store_file_list(user_token, project_name, file_list)
         return Response(result, status=status.HTTP_200_OK)
 
     def get_file_list(self, request):
@@ -33,11 +35,26 @@ class AIResultView(viewsets.ViewSet):
         result = self.ai_result_service.get_file_list(user_token, project_name)
         return Response(result, status=status.HTTP_200_OK)
 
-    # 테스트 리포트 저장 및 가져오기
+    def store_file_content(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        file_name = request.data.get('file_name')
+        file_content = request.data.get('file_content')
+        result = self.ai_result_service.store_file_content(user_token, project_name, file_name, file_content)
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get_file_content(self, request):
+        user_token = request.data.get('user_token')
+        project_name = request.data.get('project_name')
+        result = self.ai_result_service.get_file_content(user_token, project_name)
+        return Response(result, status=status.HTTP_200_OK)
+
+    # 테스트 리포트 저장
     def store_test_reports(self, request):
         user_token = request.data.get('user_token')
         project_name = request.data.get('project_name')
-        result = self.ai_result_service.fetch_and_store_test_reports(user_token, project_name)
+        test_reports = request.data.get('test_reports')
+        result = self.ai_result_service.store_test_reports(user_token, project_name, test_reports)
         return Response(result, status=status.HTTP_200_OK)
 
     def get_test_reports(self, request):
