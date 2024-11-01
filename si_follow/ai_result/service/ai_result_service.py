@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class AIResultService(ABC):
 
     @abstractmethod
-    def fetch_and_store_backlogs(self, user_token, project_name):
+    def store_backlogs(self, user_token, project_name, backlog_data):
         pass
 
     @abstractmethod
@@ -12,7 +12,7 @@ class AIResultService(ABC):
         pass
 
     @abstractmethod
-    def fetch_and_store_file_list(self, user_token, project_name):
+    def store_file_list(self, user_token, project_name,  file_list ):
         pass
 
     @abstractmethod
@@ -20,7 +20,15 @@ class AIResultService(ABC):
         pass
 
     @abstractmethod
-    def fetch_and_store_test_reports(self, user_token, project_name):
+    def store_file_content(self, user_token, project_name,file_name, file_content):
+        pass
+
+    @abstractmethod
+    def get_file_content(self, user_token, project_name):
+        pass
+
+    @abstractmethod
+    def store_test_reports(self, user_token, project_name, test_reports):
         pass
 
     @abstractmethod
