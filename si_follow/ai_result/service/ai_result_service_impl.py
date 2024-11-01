@@ -90,3 +90,20 @@ class AIResultServiceImpl(AIResultService):
         account_id = stored_data['account_id']
         return self.ai_result_repository.get_test_reports(account_id, project_name)
 
+    def store_code_review(self, user_token, project_name, code_review):
+        stored_data = self.redis_service.get_value_by_access_token(user_token)
+        if 'account_id' not in stored_data:
+            return {'error': '유효하지 않은 user_token'}
+
+        account_id = stored_data['account_id']
+        self.ai_result_repository.save_code_review(account_id, project_name, code_review)
+        return {'message': '테스트 리포트 저장 완료'}
+
+    # 테스트 리포트 조회
+    def get_code_review(self, user_token, project_name):
+        stored_data = self.redis_service.get_value_by_key(user_token)
+        if 'account_id' not in stored_data:
+            return {'error': '유효하지 않은 user_token'}
+
+        account_id = stored_data['account_id']
+        return self.ai_result_repository.get_code_review(account_id, project_name)
