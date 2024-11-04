@@ -78,15 +78,15 @@ class RedisServiceImpl(RedisService):
             raise e
 
     # 분리된 redisAccessToken 로직: accessToken을 포함하여 저장
-    def generate_and_store_access_token(self, profileRepository, email, accessToken, ttl=3600 * 24):
+    def generate_and_store_access_token(self, profileRepository, user_name, accessToken, ttl=3600 * 24):
         try:
-            account = profileRepository.findByEmail(email)
+            account = profileRepository.findByUserName(user_name)
             if not account:
                 return Response({'error': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
 
             userToken = str(uuid.uuid4())
             print(f"Generated token for account: {account.id}")
-
+            print(f"Generated token: {userToken}")
             # account_id와 accessToken을 함께 저장 + TTL 설정
             self.store_access_token(account.id, userToken, accessToken, ttl)
 
