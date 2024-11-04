@@ -46,6 +46,7 @@ class GithubOauthView(viewsets.ViewSet):
 
             # 2. Access Token으로 사용자 정보 요청
             user_info = self.githubOauthService.requestUserInfo(accessToken)
+            user_name = user_info.get('login')
             email = user_info.get('email')
 
             if not email:
@@ -60,10 +61,10 @@ class GithubOauthView(viewsets.ViewSet):
 
                 # GitHub OAuth로 로그인한 사용자이므로 loginType을 "GitHub"으로 설정
                 account = self.accountService.create("GitHub", "User")
-                self.profileRepository.create(email=email, account=account)
+                self.profileRepository.create(email=email, user_name=user_name, account=account)
 
             # 5. Redis에 Access Token과 이메일 저장
-            redis_token_response = self.redisAccessToken(email, accessToken)
+            redis_token_response = self.redisAccessToken(user_name, accessToken)
             print(f"Redis token response: {redis_token_response}")
             if redis_token_response.status_code != 200:
                 return JsonResponse({'error': 'Failed to store token in Redis'},
@@ -112,10 +113,10 @@ class GithubOauthView(viewsets.ViewSet):
             return JsonResponse({'error': str(e)}, status=500)
 
     # Redis에 Access Token 저장 (별도의 메서드로 분리)
-    def redisAccessToken(self, email, accessToken):
+    def redisAccessToken(self, user_name, accessToken):
         try:
             # Redis에 Access Token과 함께 userToken 저장
-            return self.redisService.generate_and_store_access_token(self.profileRepository, email, accessToken)
+            return self.redisService.generate_and_store_access_token(self.profileRepository, user_name, accessToken)
         except Exception as e:
             print(f"Error generating/storing access token in Redis: {e}")
             return JsonResponse({'error': 'Failed to store access token'}, status=500)

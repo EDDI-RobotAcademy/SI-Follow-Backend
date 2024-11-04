@@ -8,9 +8,15 @@ from ai_result.repository.ai_result_repository import AIResultRepository
 
 
 class AIResultRepositoryImpl(AIResultRepository):
+    __instance = None
 
-    # 백로그 저장
-    # 백로그 저장
+    @classmethod
+    def getInstance(cls):
+        if cls.__instance is None:
+            cls.__instance = cls()
+        return cls.__instance
+
+        # 백로그 저장
     def save_backlogs(self, account_id, project_name, backlog_data):
         project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)
         Backlog.objects.filter(project_id=project.id).delete()  # 기존 백로그 삭제
@@ -32,7 +38,7 @@ class AIResultRepositoryImpl(AIResultRepository):
     def get_file_list(self, account_id, project_name):
         project = Project.objects.get(account_id=account_id, project_name=project_name)
         files = FileList.objects.filter(project=project)
-        return {'project_name': project_name, 'files': [file.file_name for file in files]}
+        return {'project_name': project_name, 'files': [file.description for file in files]}
 
     def save_file_content(self, account_id, project_name, file_name, file_content):
         project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)

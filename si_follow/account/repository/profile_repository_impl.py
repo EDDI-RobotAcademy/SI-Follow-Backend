@@ -18,8 +18,8 @@ class ProfileRepositoryImpl(ProfileRepository):
 
         return cls.__instance
 
-    def create(self,  email, account):
-        profile = Profile.objects.create(email=email, account=account)
+    def create(self, email, user_name, account):
+        profile = Profile.objects.create(email=email, user_name=user_name, account=account)
         return profile
 
     def findByEmail(self, email):
@@ -31,4 +31,12 @@ class ProfileRepositoryImpl(ProfileRepository):
             print("이메일로 프로필 찾는 중 에러 발생:", e)
             raise e
 
+    def findByUserName(self, user_name):
+        try:
+            return Profile.objects.get(user_name=user_name)
+        except Profile.DoesNotExist:
+            return None
+        except Exception as e:
+            print("유저 이름으로 프로필 찾는 중 에러 발생:", e)
+            raise e
 

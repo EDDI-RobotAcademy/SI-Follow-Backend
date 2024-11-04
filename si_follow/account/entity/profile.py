@@ -4,6 +4,7 @@ from account.entity.account import Account
 
 class Profile(models.Model):
     email = models.CharField(max_length=64, unique=True)
+    user_name = models.CharField(max_length=64, unique=True)
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
 
     def __str__(self):
