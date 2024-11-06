@@ -14,6 +14,13 @@ class AIResultServiceImpl(AIResultService):
         self.fast_api_url = settings.FAST_API_URL
         self.profile_repository = ProfileRepositoryImpl.getInstance()
 
+    def get_project_list(self, user_token):
+        stored_data = self.redis_service.get_value_by_key(user_token)
+        if 'account_id' not in stored_data:
+            return {'error': '유효하지 않은 user_token'}
+        account_id = stored_data['account_id']
+        return self.ai_result_repository.get_project_list(account_id)
+
     # 백로그 저장
     def store_backlogs(self, user_name, project_name, backlog_data):
         # 데이터베이스에서 user_name으로 account_id 조회

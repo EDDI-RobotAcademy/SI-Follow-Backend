@@ -1,6 +1,11 @@
 from abc import ABC, abstractmethod
 
 class AIResultRepository(ABC):
+
+    @abstractmethod
+    def get_project_list(self, account_id):
+        pass
+
     @abstractmethod
     def save_backlogs(self, account_id, project_name, backlog_data):
         pass
