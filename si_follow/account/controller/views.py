@@ -42,20 +42,27 @@ class AccountView(viewsets.ViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def getUserEmailFromToken(self, request):
+        print("getUserEmailFromToken()")
         try:
+            # POST 요청에서 'user_token' 값 가져오기
             user_token = request.data.get('user_token')
 
             if not user_token:
                 return JsonResponse({'error': 'User token is missing'}, status=400)
 
-            # Redis에서 user_token으로 사용자 ID 조회
-            user_id = self.redisService.get_value_by_key(user_token)
 
-            if not user_id:
-                return JsonResponse({'error': 'User not found'}, status=404)
+            # Redis에서 user_token으로 사용자 정보 조회 (account_id와 access_token)
+            stored_data = self.redisService.get_value_by_key(user_token)
+            if not stored_data:
+                return JsonResponse({'error': 'User not found in Redis'}, status=404)
 
-            # 사용자 ID로 바로 Profile에서 조회
-            profile = Profile.objects.filter(account_id=user_id).first()
+            # 사용자 ID가 Redis에 저장된 값에서 가져옴 (stored_data에서 user_id 조회)
+            account_id = stored_data.get('account_id')
+            if not account_id:
+                return JsonResponse({'error': 'User ID not found in Redis data'}, status=404)
+
+            # 사용자 ID로 Profile에서 이메일 조회
+            profile = Profile.objects.filter(account_id=account_id).first()
 
             if not profile:
                 return JsonResponse({'error': 'Profile not found'}, status=404)

@@ -29,18 +29,41 @@ class RedisServiceImpl(RedisService):
             cls.__instance = cls()
         return cls.__instance
 
-    def store_access_token(self, account_id, userToken):
+    # accessToken과 account_id를 Redis에 저장
+    def store_access_token(self, account_id, userToken, accessToken, ttl=3600 * 24):
         try:
-            self.redis_client.set(userToken, account_id)
+            # Redis 해시를 사용하여 userToken을 키로, account_id와 access_token을 함께 저장
+            self.redis_client.hset(userToken, mapping={
+                'account_id': account_id,
+                'access_token': accessToken
+            })
+
+            # TTL 설정 (기본 24시간)
+            self.redis_client.expire(userToken, ttl)  # userToken에 TTL 적용
+
         except Exception as e:
             print(f"Error storing access token in Redis: {e}")
             raise e
 
+    # Redis에서 userToken으로 account_id와 accessToken 조회
     def get_value_by_key(self, userToken):
         try:
-            return self.redis_client.get(userToken)
+            return self.redis_client.hgetall(userToken)  # 모든 필드(account_id, access_token) 조회
         except Exception as e:
             print(f"Error retrieving token from Redis: {e}")
+            raise e
+
+    def get_value_by_access_token(self, accessToken):
+        try:
+            for key in self.redis_client.scan_iter():
+                if self.redis_client.type(key) != 'hash':
+                    continue  # 해시가 아닌 키는 무시
+                data = self.redis_client.hgetall(key)
+                if data.get('access_token') == accessToken:
+                    return {'userToken': key, 'account_id': data.get('account_id'), 'access_token': accessToken}
+            return None
+        except Exception as e:
+            print(f"Error retrieving account by access token from Redis: {e}")
             raise e
 
     def delete_key(self, key):
@@ -53,20 +76,22 @@ class RedisServiceImpl(RedisService):
         except Exception as e:
             print(f"Error deleting token from Redis: {e}")
             raise e
-    # 분리된 redisAccessToken 로직
-    def generate_and_store_access_token(self, profileRepository, email):
+
+    # 분리된 redisAccessToken 로직: accessToken을 포함하여 저장
+    def generate_and_store_access_token(self, profileRepository, user_name, accessToken, ttl=3600 * 24):
         try:
-            account = profileRepository.findByEmail(email)
+            account = profileRepository.findByUserName(user_name)
             if not account:
                 return Response({'error': 'Account not found'}, status=status.HTTP_404_NOT_FOUND)
 
             userToken = str(uuid.uuid4())
             print(f"Generated token for account: {account.id}")
+            print(f"Generated token: {userToken}")
+            # account_id와 accessToken을 함께 저장 + TTL 설정
+            self.store_access_token(account.id, userToken, accessToken, ttl)
 
-            self.store_access_token(account.id, userToken)
-
-            accountId = self.get_value_by_key(userToken)
-            if not accountId:
+            stored_data = self.get_value_by_key(userToken)
+            if not stored_data or 'account_id' not in stored_data or 'access_token' not in stored_data:
                 return Response({'error': 'Failed to verify token in Redis'},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -75,7 +100,7 @@ class RedisServiceImpl(RedisService):
             print(f"Error storing access token in Redis: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    # 분리된 dropRedisTokenForLogout 로직
+    # 분리된 dropRedisTokenForLogout 로직: userToken을 사용해 Redis에서 키 삭제
     def delete_access_token(self, userToken):
         try:
             isSuccess = self.delete_key(userToken)
