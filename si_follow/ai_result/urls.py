@@ -10,7 +10,7 @@ router.register(r'ai_result', AIResultView, basename='ai_result')
 # URL 패턴 정의
 urlpatterns = [
     path('', include(router.urls)),
-
+    path('project-list', AIResultView.as_view({'post': 'get_project_list'}), name='airesult-get-project-list'),
     path('backlogs', AIResultView.as_view({'post': 'store_backlogs'}), name='airesult-store-backlogs'),
     path('backlogs/get', AIResultView.as_view({'post': 'get_backlogs'}), name='airesult-get-backlogs'),
     path('file-list', AIResultView.as_view({'post': 'store_file_list'}), name='airesult-store-file-list'),

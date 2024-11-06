@@ -16,6 +16,10 @@ class AIResultRepositoryImpl(AIResultRepository):
             cls.__instance = cls()
         return cls.__instance
 
+    def get_project_list(self, account_id):
+        projects = Project.objects.filter(account__id=account_id).values_list('project_name', flat=True)
+        return {'project_list': projects}
+
         # 백로그 저장
     def save_backlogs(self, account_id, project_name, backlog_data):
         project, _ = Project.objects.get_or_create(account_id=account_id, project_name=project_name)

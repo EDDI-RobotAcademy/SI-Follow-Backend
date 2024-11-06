@@ -7,6 +7,11 @@ from ai_result.service.ai_result_service_impl import AIResultServiceImpl
 class AIResultView(viewsets.ViewSet):
     ai_result_service = AIResultServiceImpl()
 
+    def get_project_list(self, request):
+        user_token= request.data.get('user_token')
+        project_list = self.ai_result_service.get_project_list(user_token)
+        return Response(project_list, status=status.HTTP_200_OK)
+
     # 백로그 저장 및 가져오기
     def store_backlogs(self, request):
         user_token = request.data.get('user_token')

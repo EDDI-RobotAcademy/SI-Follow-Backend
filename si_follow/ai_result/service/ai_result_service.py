@@ -4,6 +4,10 @@ from abc import ABC, abstractmethod
 class AIResultService(ABC):
 
     @abstractmethod
+    def get_project_list(self, user_token):
+        pass
+
+    @abstractmethod
     def store_backlogs(self, user_token, project_name, backlog_data):
         pass
 
