@@ -32,18 +32,19 @@ class RedisServiceImpl(RedisService):
     # accessToken과 account_id를 Redis에 저장
     def store_access_token(self, account_id, userToken, accessToken, ttl=3600 * 24):
         try:
-            # Redis 해시를 사용하여 userToken을 키로, account_id와 access_token을 함께 저장
+            # print(f"Storing token for userToken: {userToken} with TTL: {ttl}")
+            # Redis 해시로 저장
             self.redis_client.hset(userToken, mapping={
                 'account_id': account_id,
                 'access_token': accessToken
             })
 
-            # TTL 설정 (기본 24시간)
-            self.redis_client.expire(userToken, ttl)  # userToken에 TTL 적용
+            # TTL 설정
+            success = self.redis_client.expire(userToken, ttl)
+            # print(f"TTL set success: {success}")
 
         except Exception as e:
             print(f"Error storing access token in Redis: {e}")
-            raise e
 
     # Redis에서 userToken으로 account_id와 accessToken 조회
     def get_value_by_key(self, userToken):
@@ -86,16 +87,19 @@ class RedisServiceImpl(RedisService):
 
             userToken = str(uuid.uuid4())
             print(f"Generated token for account: {account.id}")
-            print(f"Generated token: {userToken}")
-            # account_id와 accessToken을 함께 저장 + TTL 설정
+
+            # account_id와 accessToken을 저장하고 TTL 설정
             self.store_access_token(account.id, userToken, accessToken, ttl)
 
+            # 추가: TTL이 적용된 키가 Redis에 있는지 확인
             stored_data = self.get_value_by_key(userToken)
-            if not stored_data or 'account_id' not in stored_data or 'access_token' not in stored_data:
-                return Response({'error': 'Failed to verify token in Redis'},
+            if not stored_data:
+                print(f"Error: userToken {userToken} not found in Redis after storage.")
+                return Response({'error': 'Failed to store token in Redis'},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             return Response({'userToken': userToken}, status=status.HTTP_200_OK)
+
         except Exception as e:
             print(f"Error storing access token in Redis: {str(e)}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
